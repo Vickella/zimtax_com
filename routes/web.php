@@ -51,6 +51,21 @@ use App\Http\Controllers\Accounting\{
     AccountingReportController
 };
 
+// Payroll
+use App\Http\Controllers\Payroll\PayrollModuleController;
+use App\Http\Controllers\Payroll\EmployeeController;
+use App\Http\Controllers\Payroll\PayrollRunController;
+use App\Http\Controllers\Payroll\PayrollReportController;
+
+
+// Tax Module
+use App\Http\Controllers\Tax\TaxModuleController;
+use App\Http\Controllers\Tax\TaxSettingsController;
+use App\Http\Controllers\Tax\VatReturnController;
+use App\Http\Controllers\Tax\QpdController;
+use App\Http\Controllers\Tax\IncomeTaxController;
+
+
 /*
 |--------------------------------------------------------------------------
 | Public
@@ -170,7 +185,33 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     Route::get('reports/trial-balance.csv', [AccountingReportController::class, 'trialBalanceCsv'])->name('reports.trial-balance.csv');
                     Route::get('reports/profit-loss.csv', [AccountingReportController::class, 'profitLossCsv'])->name('reports.profit-loss.csv');
                     Route::get('reports/balance-sheet.csv', [AccountingReportController::class, 'balanceSheetCsv'])->name('reports.balance-sheet.csv');
+                     Route::get('reports/general-ledger.csv', [AccountingReportController::class, 'generalLedgerCsv'])->name('reports.general-ledger.csv');
                 });
+
+
+         // Payroll
+         Route::prefix('payroll')->name('payroll.')->group(function () {
+                    Route::get('/', [PayrollModuleController::class, 'index'])->name('index');
+
+                    // Employees
+                    Route::get('employees', [EmployeeController::class, 'index'])->name('employees.index');
+                    Route::get('employees/create', [EmployeeController::class, 'create'])->name('employees.create');
+                    Route::post('employees', [EmployeeController::class, 'store'])->name('employees.store');
+                    Route::get('employees/{employee}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
+                    Route::put('employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
+
+                    // Payroll Runs
+                    Route::get('runs', [PayrollRunController::class, 'index'])->name('runs.index');
+                    Route::get('runs/create', [PayrollRunController::class, 'create'])->name('runs.create');
+                    Route::post('runs', [PayrollRunController::class, 'store'])->name('runs.store'); // processes payroll
+                    Route::get('runs/{run}', [PayrollRunController::class, 'show'])->name('runs.show');
+                    Route::post('runs/{run}/submit', [PayrollRunController::class, 'submit'])->name('runs.submit');
+
+                    // Reports
+                    Route::get('reports', [PayrollReportController::class, 'index'])->name('reports.index');
+                    Route::get('reports/{run}/nssa-p4.csv', [PayrollReportController::class, 'nssaP4Csv'])->name('reports.nssa_p4.csv');
+                    Route::get('reports/{run}/zimra-itf16.csv', [PayrollReportController::class, 'zimraItf16Csv'])->name('reports.zimra_itf16.csv');
+                    });
 
             /*
             |--------------------------------------------------------------------------
@@ -231,6 +272,43 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 // AP Aging
                 Route::get('ap/aging', [AccountsPayableController::class, 'aging'])->name('ap.aging');
             });
+
+
+            // Tax Module
+            Route::prefix('tax')->name('tax.')->group(function () {
+
+                Route::get('/', [\App\Http\Controllers\Tax\TaxModuleController::class, 'index'])->name('index');
+
+                // Settings
+                Route::get('/settings', [\App\Http\Controllers\Tax\TaxSettingsController::class, 'edit'])->name('settings.edit');
+                Route::post('/settings', [\App\Http\Controllers\Tax\TaxSettingsController::class, 'update'])->name('settings.update');
+
+                // VAT Return (VAT 7)
+                Route::get('/vat', [\App\Http\Controllers\Tax\VatReturnController::class, 'index'])->name('vat.index');
+                Route::get('/vat/create', [\App\Http\Controllers\Tax\VatReturnController::class, 'create'])->name('vat.create');
+                Route::post('/vat', [\App\Http\Controllers\Tax\VatReturnController::class, 'store'])->name('vat.store');
+                Route::get('/vat/{vatReturn}', [\App\Http\Controllers\Tax\VatReturnController::class, 'show'])->name('vat.show');
+                Route::get('/vat/{vatReturn}/pdf', [\App\Http\Controllers\Tax\VatReturnController::class, 'pdf'])->name('vat.pdf');
+                Route::get('/vat/{vatReturn}/excel', [\App\Http\Controllers\Tax\VatReturnController::class, 'excel'])->name('vat.excel');
+
+                // QPD / ITF12B
+                Route::get('/qpd', [\App\Http\Controllers\Tax\QpdController::class, 'index'])->name('qpd.index');
+                Route::get('/qpd/create', [\App\Http\Controllers\Tax\QpdController::class, 'create'])->name('qpd.create');
+                Route::post('/qpd', [\App\Http\Controllers\Tax\QpdController::class, 'store'])->name('qpd.store');
+                Route::get('/qpd/{projection}', [\App\Http\Controllers\Tax\QpdController::class, 'show'])->name('qpd.show');
+                Route::post('/qpd/{projection}/pay/{quarterNo}', [\App\Http\Controllers\Tax\QpdController::class, 'recordPayment'])->name('qpd.pay');
+                Route::get('/qpd/{projection}/pdf/{quarterNo}', [\App\Http\Controllers\Tax\QpdController::class, 'pdf'])->name('qpd.pdf');
+                Route::get('/qpd/{projection}/excel', [\App\Http\Controllers\Tax\QpdController::class, 'excel'])->name('qpd.excel');
+
+                // Income Tax / ITF12C
+                Route::get('/income-tax', [\App\Http\Controllers\Tax\IncomeTaxController::class, 'index'])->name('income.index');
+                Route::get('/income-tax/create', [\App\Http\Controllers\Tax\IncomeTaxController::class, 'create'])->name('income.create');
+                Route::post('/income-tax', [\App\Http\Controllers\Tax\IncomeTaxController::class, 'store'])->name('income.store');
+                Route::get('/income-tax/{incomeTaxReturn}', [\App\Http\Controllers\Tax\IncomeTaxController::class, 'show'])->name('income.show');
+                Route::get('/income-tax/{incomeTaxReturn}/pdf', [\App\Http\Controllers\Tax\IncomeTaxController::class, 'pdf'])->name('income.pdf');
+                Route::get('/income-tax/{incomeTaxReturn}/excel', [\App\Http\Controllers\Tax\IncomeTaxController::class, 'excel'])->name('income.excel');
+            });
+
 
             /*
             |--------------------------------------------------------------------------
