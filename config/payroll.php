@@ -3,7 +3,7 @@
 return [
     // Chart of Accounts codes used for payroll journal posting
     'accounts' => [
-        'payroll_expense'      => '5000',
+        'payroll_expense'      => '6100',
         'salaries_payable'     => '2100',
 
         'paye_payable'         => '2110',

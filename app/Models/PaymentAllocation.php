@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class PaymentAllocation extends Model
 {
     protected $table = 'payment_allocations';
-    public $timestamps = false;
-
+    
     protected $fillable = [
-        'payment_id','reference_type','reference_id','allocated_amount',
+        'payment_id',
+        'invoice_type',
+        'invoice_id',
+        'allocated_amount',
     ];
 
     protected $casts = [
@@ -19,6 +21,6 @@ class PaymentAllocation extends Model
 
     public function payment()
     {
-        return $this->belongsTo(Payment::class, 'payment_id');
+        return $this->belongsTo(Payment::class);
     }
 }
