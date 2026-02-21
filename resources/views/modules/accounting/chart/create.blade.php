@@ -37,6 +37,13 @@
                    required>
         </div>
 
+        <div>
+            <label class="text-xs text-slate-300">Type</label>
+            <input name="name" value="{{ old('name') }}"
+                   class="w-full mt-1 px-3 py-2 rounded-lg bg-black/30 text-slate-100 ring-1 ring-white/10 outline-none"
+                   required>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <label class="flex items-center gap-2 text-sm text-slate-200">
                 <input type="checkbox" name="is_control_account" value="1" @checked(old('is_control_account') == 1)

@@ -1,40 +1,38 @@
 @extends('layouts.app')
 
-@section('page_title','Create Payment Entry')
+@section('page_title', 'Create Payment')
 
 @section('content')
-<div class="max-w-6xl mx-auto space-y-4">
-
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-lg font-semibold">Create Payment Entry</h1>
-            <p class="text-xs text-slate-300">Draft payments and allocate them to invoices (AR/AP).</p>
-        </div>
-        <a href="{{ route('modules.accounting.payments.index') }}"
-           class="px-3 py-2 rounded-lg bg-white/10 ring-1 ring-white/10 hover:bg-white/15 text-sm">
-            Back
-        </a>
-    </div>
-
-    <form method="POST" action="{{ route('modules.accounting.payments.store') }}" class="space-y-4">
+<div class="max-w-7xl mx-auto">
+    <form method="POST" action="{{ route('modules.accounting.payments.store') }}" id="paymentForm">
         @csrf
-
         @include('modules.accounting.payments._form', [
             'payment' => $payment,
-            // Controller should pass:
-            // $accounts (bank/cash accounts), $customers, $suppliers, $openSalesInvoices, $openPurchaseInvoices
+            'accounts' => $accounts,
+            'customers' => $customers,
+            'suppliers' => $suppliers,
+            'openSalesInvoices' => $openSalesInvoices,
+            'openPurchaseInvoices' => $openPurchaseInvoices
         ])
-
-        <div class="flex items-center justify-end gap-2">
-            <button class="px-4 py-2 rounded-lg bg-indigo-500/20 ring-1 ring-indigo-400/30 hover:bg-indigo-500/25 text-sm">
-                Save Draft
-            </button>
-        </div>
     </form>
-
 </div>
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/payment-entry.js') }}"></script>
+<script>
+document.getElementById('paymentForm')?.addEventListener('submit', function(e) {
+    const submitButton = e.submitter;
+    if (submitButton && submitButton.value === 'submit') {
+        // Show loading state
+        submitButton.disabled = true;
+        submitButton.innerHTML = `
+            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Processing...
+        `;
+    }
+});
+</script>
 @endpush

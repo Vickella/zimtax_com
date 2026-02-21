@@ -13,7 +13,13 @@ class ArService
         // Outstanding per invoice = invoice.total - sum(allocations)
         $q = DB::table('sales_invoices as si')
             ->selectRaw('
-                si.id, si.invoice_no, si.customer_id, si.posting_date, si.due_date, si.currency, si.total,
+                si.id, 
+                si.invoice_no, 
+                si.customer_id, 
+                si.posting_date, 
+                si.due_date, 
+                si.currency, 
+                si.total,
                 COALESCE(SUM(pa.allocated_amount),0) as allocated,
                 (si.total - COALESCE(SUM(pa.allocated_amount),0)) as outstanding
             ')
@@ -23,9 +29,12 @@ class ArService
             })
             ->where('si.company_id', $companyId)
             ->where('si.status', 'SUBMITTED')
-            ->groupBy('si.id');
+            // FIX: Add all non-aggregated columns to GROUP BY
+            ->groupBy('si.id', 'si.invoice_no', 'si.customer_id', 'si.posting_date', 'si.due_date', 'si.currency', 'si.total');
 
-        if ($customerId) $q->where('si.customer_id', $customerId);
+        if ($customerId) {
+            $q->where('si.customer_id', $customerId);
+        }
 
         $rows = $q->get();
 
@@ -62,11 +71,15 @@ class ArService
                 'total' => (float)$r->total,
                 'allocated' => (float)$r->allocated,
                 'outstanding' => (float)$r->outstanding,
-                'days_overdue' => $days,
+                'days_overdue' => $days > 0 ? $days : 0, // Don't show negative days
                 'bucket' => $bucket,
             ];
         }
 
-        return ['as_of'=>$asOfDate,'buckets'=>$buckets,'rows'=>$detail];
+        return [
+            'as_of' => $asOfDate,
+            'buckets' => $buckets,
+            'rows' => $detail
+        ];
     }
 }

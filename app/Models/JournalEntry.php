@@ -3,39 +3,52 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\BelongsToCompany;
 
 class JournalEntry extends Model
 {
-    use BelongsToCompany;
-
     protected $table = 'journal_entries';
-
+    
     protected $fillable = [
-        'company_id','entry_no','posting_date','memo','status',
-        'source_type','source_id','currency','exchange_rate',
-        'created_by','posted_by','posted_at',
+        'company_id', 'entry_no', 'posting_date', 'memo', 'status',
+        'source_type', 'source_id', 'currency', 'exchange_rate',
+        'created_by', 'posted_by', 'posted_at', 'created_at'
     ];
 
     protected $casts = [
         'posting_date' => 'date',
-        'exchange_rate' => 'decimal:8',
         'posted_at' => 'datetime',
+        'created_at' => 'datetime',
+        'exchange_rate' => 'decimal:4',
     ];
 
-    // in JournalEntry model
-public function lines()
-{
-    return $this->hasMany(\App\Models\JournalLine::class, 'journal_entry_id');
-}
+    /**
+     * Get the lines for this journal entry
+     */
+    public function lines()
+    {
+        return $this->hasMany(JournalLine::class, 'journal_entry_id');
+    }
 
+    /**
+     * Get the GL entries for this journal entry
+     * THIS IS THE MISSING RELATIONSHIP
+     */
+    public function glEntries()
+    {
+        return $this->hasMany(GLEntry::class, 'journal_entry_id');
+    }
 
-    public function createdBy()
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function postedBy()
+    public function poster()
     {
         return $this->belongsTo(User::class, 'posted_by');
     }

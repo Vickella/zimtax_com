@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder; // ← ADD THIS LINE
 
 class ChartOfAccount extends Model
 {
@@ -35,6 +36,22 @@ class ChartOfAccount extends Model
     public function company()
     {
         return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * Scope to filter by company
+     */
+    public function scopeForCompany(Builder $query, int $companyId): Builder
+    {
+        return $query->where('company_id', $companyId);
+    }
+
+    /**
+     * Scope to get active accounts only
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('is_active', true);
     }
 
     public function parent()

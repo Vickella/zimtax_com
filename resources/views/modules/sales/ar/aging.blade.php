@@ -47,7 +47,7 @@
                 @foreach($data['rows'] as $r)
                 <tr class="hover:bg-white/5">
                     <td class="p-3">
-                        <a class="text-indigo-200 hover:underline" href="{{ route('sales.invoices.show',$r['invoice_id']) }}">{{ $r['invoice_no'] }}</a>
+                        <a class="text-indigo-200 hover:underline" href="{{ route('modules.sales.invoices.show',$r['invoice_id']) }}">{{ $r['invoice_no'] }}</a>
                     </td>
                     <td class="p-3">{{ $r['due_date'] }}</td>
                     <td class="p-3">{{ $r['days_overdue'] }}</td>
